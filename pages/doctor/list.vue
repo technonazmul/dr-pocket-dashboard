@@ -174,44 +174,45 @@
                             ></textarea>
                           </div>
                         </div>
-                        <div class="col-3">
-                          <div class="input-block local-forms">
-                            <div id="timeSlotsContainer">
+                        <div class="col-12">
+                          <div class="row">
+                            <h4>Available Time Slots:</h4>
+                            <br />
+
+                            <div
+                              class="col-3 mb-5"
+                              v-for="(slots, day) in form.timeSlots"
+                              :key="day"
+                            >
+                              <h5>{{ day }}</h5>
                               <div
-                                v-for="(slot, index) in form.timeSlots"
+                                v-for="(slot, index) in slots"
                                 :key="index"
+                                class="time-slot-item"
                               >
-                                <label :for="'time-slot-' + (index + 1)"
-                                  >Available Time Slots for Online Treament
-                                  {{ index + 1 }}:</label
-                                >
                                 <input
                                   type="text"
-                                  :id="'time-slot-' + (index + 1)"
-                                  v-model="form.timeSlots[index]"
+                                  v-model="form.timeSlots[day][index]"
                                   placeholder="e.g., 10:00 AM - 11:00 AM"
-                                  required
                                   class="form-control mb-2"
                                 />
-
                                 <button
-                                  v-if="form.timeSlots.length > 1"
+                                  v-if="form.timeSlots[day].length > 1"
                                   type="button"
-                                  @click="removeTimeSlot(index)"
+                                  @click="removeTimeSlot(day, index)"
                                   class="btn btn-outline-danger mt-1 mb-1"
                                 >
                                   <i class="fa fa-minus" aria-hidden="true"></i>
                                 </button>
                               </div>
+                              <button
+                                type="button"
+                                @click="addTimeSlot(day)"
+                                class="btn btn-outline-primary mt-1"
+                              >
+                                Add Another Time Slot for {{ day }}
+                              </button>
                             </div>
-
-                            <button
-                              type="button"
-                              @click="addTimeSlot"
-                              class="btn btn-outline-primary"
-                            >
-                              Add Another Time Slot
-                            </button>
                           </div>
                         </div>
                         <div class="col-12">
@@ -338,7 +339,16 @@ export default {
         chamberNameAddress: "",
         visitingHour: "",
         password: "",
-        timeSlots: [""],
+
+        timeSlots: {
+          Saturday: [""],
+          Sunday: [""],
+          Monday: [""],
+          Tuesday: [""],
+          Wednesday: [""],
+          Thursday: [""],
+          Friday: [""],
+        },
       },
     };
   },
@@ -403,23 +413,24 @@ export default {
         password: "",
       };
     },
-    // Time slot
-    addTimeSlot() {
-      this.form.timeSlots.push(""); // Add a new time slot input field
-    },
+
     // Show collapseable
     editDoctor() {
       document.getElementById("collapseExample").show(); // Add a new time slot input field
     },
     // remove time slot
-    // Remove time slot input field
-    removeTimeSlot(index) {
-      if (this.form.timeSlots.length > 1) {
-        this.form.timeSlots.splice(index, 1); // Remove the slot at the specified index
+
+    addTimeSlot(day) {
+      this.form.timeSlots[day].push(""); // Add a new time slot for the selected day
+    },
+    removeTimeSlot(day, index) {
+      if (this.form.timeSlots[day].length > 1) {
+        this.form.timeSlots[day].splice(index, 1); // Remove the specific time slot for the selected day
       } else {
         alert("You must have at least one time slot.");
       }
     },
+    // The rest of your methods remain the same
   },
 };
 </script>

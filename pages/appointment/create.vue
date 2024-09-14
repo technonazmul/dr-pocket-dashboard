@@ -95,11 +95,10 @@
         <div class="row">
           <div class="col-3" v-for="doctor in doctors" :key="doctor._id">
             <div class="card">
-              <img
-                src="https://i.postimg.cc/65PjHcbm/doctor.jpg"
-                class="card-img-top"
-                alt="..."
-              />
+              <i
+                class="fas fa-user-md mt-5"
+                style="font-size: 100px; margin: 0 auto"
+              ></i>
               <div class="card-body">
                 <h5 class="card-title">{{ doctor.name }}</h5>
                 <p class="card-text">
