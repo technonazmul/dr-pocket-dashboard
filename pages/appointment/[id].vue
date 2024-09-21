@@ -66,7 +66,19 @@
                 <p class="card-text">
                   {{ singleUser.phone }}
                   <br />
-                  <button class="btn btn-outline-primary">Select User</button>
+                  <button
+                    :class="{
+                      'btn btn-outline-primary':
+                        selectedUserId !== singleUser._id,
+                      'btn btn-primary': selectedUserId === singleUser._id,
+                    }"
+                    @click.prevent="selelctUser(singleUser._id)"
+                  >
+                    <span v-if="selectedUserId === singleUser._id">
+                      User Selected <i class="fa-solid fa-check"></i>
+                    </span>
+                    <span v-else> Select User </span>
+                  </button>
                 </p>
               </div>
             </div>
@@ -75,7 +87,7 @@
       </div>
 
       <h5 class="ms-5 mt-5">Select Appointment Time</h5>
-      <div class="ms-5" v-for="(slots, day) in doctor.timeSlots" :key="day">
+      <div class="ms-5" v-for="(slots, day) in nextThreeDaysSlots" :key="day">
         <span>{{ day }}:</span>
         <div>
           <a
@@ -84,15 +96,30 @@
               'btn',
               'btn-outline-primary',
               'm-3',
-              { active: activeSlot === `slot-${day}-${index}` },
+              { active: activeSlot === `slot-${day}-${slot}` },
             ]"
             v-for="(slot, index) in slots"
             :key="index"
-            @click.prevent="handleSlotClick(day, index)"
+            @click.prevent="handleSlotClick(day, slot)"
             >{{ slot }}</a
           >
         </div>
       </div>
+
+      <button
+        class="btn btn-primary form-control m-5"
+        @click.prevent="submitBookingInfo()"
+        v-if="selectedUserId && doctor._id && activeSlot"
+      >
+        Book
+      </button>
+      <button
+        class="btn btn-primary form-control m-5"
+        @click.prevent="submitBookingInfo()"
+        v-else
+      >
+        Select All field
+      </button>
     </div>
 
     <Footer></Footer>
@@ -114,9 +141,12 @@ export default {
       doctor: "",
       users: "",
       searchedUsers: "",
+      nextDayDate: "",
+      selectedSlot: "",
       search: {
         phone: "",
       },
+      selectedUserId: null,
       activeSlot: null, // To keep track of the active slot
       timeSlots: {
         Saturday: [""],
@@ -154,11 +184,54 @@ export default {
       console.error("Error fetching data:", error);
     }
   },
+  computed: {
+    nextThreeDaysSlots() {
+      if (!this.doctor || !this.doctor.timeSlots) {
+        return {}; // Return an empty object if timeSlots is not yet defined
+      }
+
+      const today = new Date();
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      let nextThreeDays = {};
+
+      for (let i = 0; i <= 3; i++) {
+        const nextDay = new Date(today);
+        nextDay.setDate(today.getDate() + i);
+        const dayName = daysOfWeek[nextDay.getDay()];
+        if (this.doctor.timeSlots[dayName]) {
+          // Filter the slots to remove the ones that have passed
+          nextThreeDays[dayName] = this.doctor.timeSlots[dayName].filter(
+            (slot) => !this.isPastSlot(slot, nextDay)
+          );
+        }
+      }
+
+      return nextThreeDays;
+    },
+  },
+
   methods: {
-    handleSlotClick(day, index) {
+    handleSlotClick(day, slot) {
       // Create a unique identifier for each slot
-      this.activeSlot = `slot-${day}-${index}`;
-      console.log(day, index, this.$route.params.id);
+      this.activeSlot = `slot-${day}-${slot}`;
+      this.nextDayDate = this.getNextDayDate(day);
+      this.selectedSlot = slot;
+
+      console.log(
+        this.nextDayDate,
+        day,
+        this.selectedSlot,
+        this.$route.params.id,
+        this.selectedUserId
+      );
     },
     async searchUser() {
       try {
@@ -172,6 +245,91 @@ export default {
       } catch (error) {
         console.error("Error fetching users:", error);
       }
+    },
+    isPastSlot(slot, date) {
+      const [startTime] = slot.split("-");
+      const slotTime = this.convertTo24HourFormat(startTime);
+      const now = new Date();
+
+      // Check if it's the current day and the slot has passed
+      if (
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+      ) {
+        return now >= slotTime;
+      }
+
+      return false; // For future days, we don't filter out any slots
+    },
+    convertTo24HourFormat(time) {
+      const [hoursMinutes, modifier] = time.split(/(AM|PM)/);
+      let [hours, minutes] = hoursMinutes.split(":");
+      if (modifier === "PM" && hours !== "12") {
+        hours = parseInt(hours) + 12;
+      }
+      if (modifier === "AM" && hours === "12") {
+        hours = "00";
+      }
+      const date = new Date();
+      date.setHours(hours, minutes);
+      return date;
+    },
+    selelctUser(userId) {
+      this.selectedUserId = userId;
+    },
+    async submitBookingInfo() {
+      if (!this.activeSlot || !this.selectedUserId || !this.doctor._id) {
+        alert("Please select all the required fields.");
+        return;
+      }
+      const bookingData = {
+        date: this.nextDayDate, // The next occurrence of the selected day
+        slot: this.selectedSlot, // The selected time slot (e.g., 10:00AM-10:20AM)
+        doctorId: this.$route.params.id, // The ID of the doctor
+        userId: this.selectedUserId, // The ID of the selected user
+      };
+
+      try {
+        // Send the booking request via axios
+        const response = await axios.post(
+          "http://localhost:5000/api/backend/book/",
+          bookingData
+        );
+
+        console.log("Booking successful:", response.data);
+        alert("Booking successful!");
+      } catch (error) {
+        console.error("Error submitting booking info:", error);
+        alert("Failed to submit booking.");
+      }
+    },
+    getNextDayDate(selectedDay) {
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
+      const today = new Date();
+      const currentDayIndex = today.getDay(); // Current day of the week (0-6)
+      const selectedDayIndex = daysOfWeek.indexOf(selectedDay); // Index of the selected day (0-6)
+
+      // Calculate how many days until the next occurrence of the selected day
+      const dayDifference =
+        selectedDayIndex >= currentDayIndex
+          ? selectedDayIndex - currentDayIndex
+          : 7 - (currentDayIndex - selectedDayIndex);
+
+      // Get the next occurrence date
+      const nextDay = new Date(today);
+      nextDay.setDate(today.getDate() + dayDifference);
+
+      return nextDay.toLocaleDateString(); // Returns the date in a readable format (you can customize it)
     },
   },
 };
