@@ -7,20 +7,24 @@
         <!-- Page Header -->
         <div class="page-header">
           <div class="row">
-            <div class="col-sm-12">
+            <div class="col-sm-12 text-end">
               <ul class="breadcrumb">
-                <li class="breadcrumb-item">
-                  <a href="doctors.html">Doctors </a>
-                </li>
+                <li class="breadcrumb-item"></li>
                 <li class="breadcrumb-item">
                   <i class="feather-chevron-right"></i>
                 </li>
-                <li class="breadcrumb-item active">Add Doctor</li>
+                <li class="breadcrumb-item active">Edit Doctor</li>
               </ul>
+              <img
+                :src="`http://localhost:5000/uploads/${form.image}`"
+                alt=""
+                width="100"
+              />
             </div>
           </div>
         </div>
         <!-- /Page Header -->
+
         <div class="row">
           <div class="col-sm-12">
             <div class="card">
@@ -29,7 +33,7 @@
                   <div class="row">
                     <div class="col-12">
                       <div class="form-heading">
-                        <h4>Doctor Edit</h4>
+                        <h4>Doctor Details</h4>
                       </div>
                     </div>
                     <div class="col-12 col-md-6 col-xl-4">
@@ -42,6 +46,7 @@
                           type="text"
                           v-model="form.name"
                           placeholder=""
+                          required
                         />
                       </div>
                     </div>
@@ -56,6 +61,7 @@
                           type="text"
                           v-model="form.personalNumber"
                           placeholder=""
+                          required
                         />
                       </div>
                     </div>
@@ -73,26 +79,7 @@
                         />
                       </div>
                     </div>
-                    <div class="col-12 col-md-6">
-                      <div class="input-block local-forms">
-                        <label
-                          >Department <span class="login-danger">*</span></label
-                        >
-                        <select
-                          class="form-control select"
-                          v-model="form.department"
-                        >
-                          <option>Select</option>
-                          <option
-                            v-for="item in departments"
-                            :key="item._id"
-                            :value="item._id"
-                          >
-                            {{ item.name }}
-                          </option>
-                        </select>
-                      </div>
-                    </div>
+
                     <div class="col-12 col-md-6">
                       <div class="input-block local-forms">
                         <label
@@ -101,6 +88,7 @@
                         <select
                           class="form-control select"
                           v-model="form.specialization"
+                          required
                         >
                           <option>Select</option>
                           <option
@@ -113,9 +101,9 @@
                         </select>
                       </div>
                     </div>
-                    <div class="col-12 col-md-6 col-xl-6">
+                    <div class="col-6">
                       <div class="input-block local-forms">
-                        <label>Specialty</label>
+                        <label>Specialties In Text</label>
                         <input
                           class="form-control"
                           type="text"
@@ -124,7 +112,7 @@
                         />
                       </div>
                     </div>
-                    <div class="col-12 col-md-6 col-xl-6">
+                    <div class="col-6">
                       <div class="input-block local-forms">
                         <label>Designation & Department</label>
                         <input
@@ -135,6 +123,54 @@
                         />
                       </div>
                     </div>
+
+                    <div class="col-6">
+                      <div class="input-block local-forms">
+                        <label>Videos</label>
+                        <input
+                          class="form-control"
+                          type="text"
+                          v-model="form.videos"
+                          placeholder=""
+                        />
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-sm-12">
+                      <div class="input-block local-forms">
+                        <label>Biography</label>
+                        <textarea
+                          class="form-control"
+                          rows="3"
+                          v-model="form.biography"
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-xl-6">
+                      <div class="input-block local-forms">
+                        <label>Experience</label>
+                        <input
+                          class="form-control"
+                          type="text"
+                          v-model="form.experience"
+                          placeholder=""
+                        />
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 col-xl-6">
+                      <div class="input-block local-forms">
+                        <label>Total Patients</label>
+                        <input
+                          class="form-control"
+                          type="text"
+                          v-model="form.patient"
+                          placeholder=""
+                        />
+                      </div>
+                    </div>
+
                     <div class="col-12 col-sm-12">
                       <div class="input-block local-forms">
                         <label
@@ -148,6 +184,7 @@
                         ></textarea>
                       </div>
                     </div>
+
                     <div class="col-12 col-sm-12">
                       <div class="input-block local-forms">
                         <label>Visiting Hour (Time & Date)</label>
@@ -161,8 +198,8 @@
                     <div class="col-12">
                       <div class="row">
                         <h4>Available Time Slots:</h4>
+                        <br />
 
-                        <!-- Loop through each day and display time slots -->
                         <div
                           class="col-3 mb-5"
                           v-for="(slots, day) in form.timeSlots"
@@ -180,7 +217,6 @@
                               placeholder="e.g., 10:00 AM - 11:00 AM"
                               class="form-control mb-2"
                             />
-                            <!-- Remove button for time slots -->
                             <button
                               v-if="form.timeSlots[day].length > 1"
                               type="button"
@@ -190,7 +226,6 @@
                               <i class="fa fa-minus" aria-hidden="true"></i>
                             </button>
                           </div>
-                          <!-- Add button for new time slots -->
                           <button
                             type="button"
                             @click="addTimeSlot(day)"
@@ -202,7 +237,23 @@
                       </div>
                     </div>
 
-                    <div class="col-12">
+                    <div class="col-6">
+                      <div class="input-block local-forms">
+                        <label for=""
+                          >Update Image
+                          <span class="login-danger">*</span></label
+                        >
+                        <input
+                          type="file"
+                          @change="onFileChange"
+                          class="form-control"
+                          ref="fileInput"
+                          :key="fileInputKey"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="col-6">
                       <div class="input-block local-forms">
                         <label
                           >Password <span class="login-danger">*</span></label
@@ -260,15 +311,17 @@ export default {
   data() {
     return {
       specialties: [],
-      departments: [],
 
       responseMessage: "",
       form: {
         name: "",
         personalNumber: "",
         specialty: "",
+        biography: "",
+        experience: "",
+        videos: "",
+        patient: "",
         specialization: "",
-        department: "",
         designationAndDepartment: "",
         qualifications: "",
         appointmentPhoneNumber: "",
@@ -277,6 +330,7 @@ export default {
         chamberNameAddress: "",
         visitingHour: "",
         password: "",
+        image: null,
         timeSlots: {
           Saturday: [""],
           Sunday: [""],
@@ -287,6 +341,7 @@ export default {
           Friday: [""],
         },
       },
+      fileInputKey: Date.now(),
     };
   },
   async asyncData({ params }) {},
@@ -312,21 +367,53 @@ export default {
       "http://localhost:5000/api/backend/specilities"
     );
     this.specialties = getspecilities.data;
-
-    const getdepartment = await axios.get(
-      "http://localhost:5000/api/backend/departments"
-    );
-    this.departments = getdepartment.data;
   },
   methods: {
     // Add doctor
     // Update doctor
     async updateDoctor() {
       try {
-        const response = await axios.put(
-          `http://localhost:5000/api/backend/doctor/${this.doctorId}`,
-          this.form
+        const formData = new FormData();
+
+        // Append form fields to FormData
+        formData.append("name", this.form.name);
+        formData.append("personalNumber", this.form.personalNumber);
+        formData.append("specialty", this.form.specialty);
+        formData.append("biography", this.form.biography);
+        formData.append("experience", this.form.experience);
+        formData.append("videos", this.form.videos);
+        formData.append("patient", this.form.patient);
+        formData.append("specialization", this.form.specialization);
+
+        formData.append(
+          "designationAndDepartment",
+          this.form.designationAndDepartment
         );
+        formData.append("qualifications", this.form.qualifications);
+        formData.append(
+          "appointmentPhoneNumber",
+          this.form.appointmentPhoneNumber
+        );
+        formData.append("email", this.form.email);
+        formData.append("workplace", this.form.workplace);
+        formData.append("chamberNameAddress", this.form.chamberNameAddress);
+        formData.append("visitingHour", this.form.visitingHour);
+        formData.append("password", this.form.password);
+        formData.append("timeSlots", JSON.stringify(this.form.timeSlots));
+
+        formData.append("image", this.form.image);
+
+        const response = await axios.post(
+          `http://localhost:5000/api/backend/doctor/update/${this.doctorId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        this.form = response.data;
 
         toastr.success("Update Successfully!");
         // Optionally redirect or reset form
@@ -372,6 +459,10 @@ export default {
       } else {
         alert("You must have at least one time slot.");
       }
+    },
+    onFileChange(e) {
+      this.form.image = e.target.files[0];
+      console.log(this.form.image);
     },
   },
 };

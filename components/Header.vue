@@ -200,12 +200,6 @@
         <div id="sidebar-menu" class="sidebar-menu">
           <ul>
             <li class="">
-              <a href="/adddepartment" class="active">
-                <span> Departments </span></a
-              >
-            </li>
-
-            <li class="">
               <a href="/addSpecialized" class="active">
                 <span> Specilities </span></a
               >
@@ -218,16 +212,34 @@
               <a href="/user/list" class="active"> <span> Users </span></a>
             </li>
 
+            <li class="submenu">
+              <a href="#"
+                ><span class="menu-side"
+                  ><img src="/assets/img/icons/menu-icon-04.svg" alt=""
+                /></span>
+                <span class="active"> Appointments </span>
+                <span class="menu-arrow"></span
+              ></a>
+              <ul style="display: none">
+                <li><a href="/appointment/create">Book Appointment</a></li>
+                <li><a href="/appointment/list">Appointment List</a></li>
+
+                <li><a href="">Edit Appointment</a></li>
+              </ul>
+            </li>
             <li class="">
-              <a href="/appointment/create" class="active">
-                <span> Appointments </span></a
+              <a href="/banner/manage" class="active">
+                <span>Mobile Banners </span></a
               >
             </li>
           </ul>
           <div class="logout-btn">
-            <a href="login.html" class="menu-side">
-              <span>Logout</span>
-            </a>
+            <a href="login.html"
+              ><span class="menu-side"
+                ><img src="/assets/img/icons/logout.svg" alt=""
+              /></span>
+              <span>Logout</span></a
+            >
           </div>
         </div>
       </div>

@@ -147,7 +147,6 @@ export default {
   data() {
     return {
       specialties: [],
-      departments: [],
       users: [],
       isLoading: true, // New loading state
       responseMessage: "",
@@ -169,12 +168,6 @@ export default {
         "http://localhost:5000/api/backend/specilities"
       );
       this.specialties = getspecilities.data;
-
-      // Fetch departments
-      const getdepartment = await axios.get(
-        "http://localhost:5000/api/backend/departments"
-      );
-      this.departments = getdepartment.data;
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {

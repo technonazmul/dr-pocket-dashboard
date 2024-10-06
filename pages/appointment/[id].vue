@@ -85,24 +85,31 @@
           </div>
         </div>
       </div>
-
-      <h5 class="ms-5 mt-5">Select Appointment Time</h5>
-      <div class="ms-5" v-for="(slots, day) in nextThreeDaysSlots" :key="day">
-        <span>{{ day }}:</span>
-        <div>
-          <a
-            href="#"
-            :class="[
-              'btn',
-              'btn-outline-primary',
-              'm-3',
-              { active: activeSlot === `slot-${day}-${slot}` },
-            ]"
-            v-for="(slot, index) in slots"
-            :key="index"
-            @click.prevent="handleSlotClick(day, slot)"
-            >{{ slot }}</a
-          >
+      <div v-if="selectedUserId">
+        <h5 class="ms-5 mt-5">Select Appointment Time</h5>
+        <div class="ms-5" v-for="(slots, day) in nextThreeDaysSlots" :key="day">
+          <span>{{ day }}:</span>
+          <div>
+            <a
+              href="#"
+              :class="[
+                'btn',
+                'm-3',
+                {
+                  'btn-outline-primary': !slot.isBooked,
+                  'btn-secondary': slot.isBooked,
+                  'disabled-slot': slot.isBooked,
+                  active: activeSlot === `slot-${day}-${slot.slot}`,
+                },
+              ]"
+              v-for="(slot, index) in slots"
+              :key="index"
+              @click.prevent="!slot.isBooked && handleSlotClick(day, slot.slot)"
+              :disabled="slot.isBooked"
+            >
+              {{ slot.slot }}
+            </a>
+          </div>
         </div>
       </div>
 
@@ -112,13 +119,6 @@
         v-if="selectedUserId && doctor._id && activeSlot"
       >
         Book
-      </button>
-      <button
-        class="btn btn-primary form-control m-5"
-        @click.prevent="submitBookingInfo()"
-        v-else
-      >
-        Select All field
       </button>
     </div>
 
@@ -143,6 +143,7 @@ export default {
       searchedUsers: "",
       nextDayDate: "",
       selectedSlot: "",
+      bookedSlots: [],
       search: {
         phone: "",
       },
@@ -176,8 +177,18 @@ export default {
       }
     }
 
+    // Fetch booked slots for the doctor (for today and future dates)
     try {
-      // Fetch doctors
+      const bookedSlotsResponse = await axios.get(
+        `http://localhost:5000/api/backend/booked-slots/${this.doctorId}`
+      );
+      this.bookedSlots = bookedSlotsResponse.data;
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+    }
+
+    try {
+      // Fetch users
       const users = await axios.get("http://localhost:5000/api/backend/users");
       this.users = users.data;
     } catch (error) {
@@ -207,10 +218,12 @@ export default {
         nextDay.setDate(today.getDate() + i);
         const dayName = daysOfWeek[nextDay.getDay()];
         if (this.doctor.timeSlots[dayName]) {
-          // Filter the slots to remove the ones that have passed
-          nextThreeDays[dayName] = this.doctor.timeSlots[dayName].filter(
-            (slot) => !this.isPastSlot(slot, nextDay)
-          );
+          nextThreeDays[dayName] = this.doctor.timeSlots[dayName]
+            .filter((slot) => !this.isPastSlot(slot, nextDay))
+            .map((slot) => ({
+              slot,
+              isBooked: this.isSlotBooked(slot, nextDay), // Mark if slot is booked
+            }));
         }
       }
 
@@ -331,6 +344,28 @@ export default {
 
       return nextDay.toLocaleDateString(); // Returns the date in a readable format (you can customize it)
     },
+
+    isSlotBooked(slot, date) {
+      const formattedDate = date.toLocaleDateString();
+      return this.bookedSlots.some(
+        (bookedSlot) =>
+          bookedSlot.slot === slot && bookedSlot.date === formattedDate
+      );
+    },
   },
 };
 </script>
+
+<style scoped>
+/* Style for disabled slots */
+.disabled-slot {
+  pointer-events: none; /* Disable clicking */
+  cursor: not-allowed; /* Change cursor to not-allowed */
+  opacity: 0.5; /* Optional: lower opacity to indicate disabled */
+  background-color: rgb(
+    124,
+    120,
+    120
+  ); /* Optional: change background to indicate disabled */
+}
+</style>

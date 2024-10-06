@@ -91,7 +91,7 @@
             </div>
           </div>
         </div>
-        {{ doctors }}
+
         <div class="row">
           <div class="col-3" v-for="doctor in doctors" :key="doctor._id">
             <div class="card">

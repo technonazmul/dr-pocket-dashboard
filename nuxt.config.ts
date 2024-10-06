@@ -24,6 +24,10 @@ export default defineNuxtConfig({
   app: {
     head: {
       script: [
+        {
+          src: "https://meet.jit.si/external_api.js",
+          async: true,
+        },
         // jQuery
         { src: "/assets/js/jquery-3.7.1.min.js", type: "text/javascript" },
 

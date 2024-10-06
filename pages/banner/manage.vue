@@ -14,14 +14,17 @@
                   <div class="row">
                     <div class="col-12">
                       <div class="form-heading">
-                        <h4>Add Specialize</h4>
+                        <h4>Banner</h4>
                       </div>
                     </div>
                     <div class="col-12">
                       <div class="input-block local-forms">
-                        <label>Name <span class="login-danger">*</span></label>
+                        <label
+                          >Priority Number
+                          <span class="login-danger">*</span></label
+                        >
                         <input
-                          v-model="newSpeciality.name"
+                          v-model="newSpeciality.priority"
                           class="form-control"
                           type="text"
                         />
@@ -64,40 +67,42 @@
               >
                 <thead>
                   <tr>
-                    <th>Speciality</th>
+                    <th>Image</th>
+                    <th>Priority Number</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="specility in specialties" :key="specility._id">
+                  <tr v-for="banner in banners" :key="banner._id">
                     <td>
                       <img
-                        :src="`http://localhost:5000/uploads/${specility.image}`"
+                        :src="`http://localhost:5000/uploads/${banner.image}`"
                         alt=""
-                        width="50"
-                        v-if="specility.image && !specility.newImage"
+                        width="200"
+                        v-if="banner.image && !banner.newImage"
                       />
                       <img
-                        v-else="specility.newImage"
-                        :src="getImagePreviewUrl(specility.newImage)"
+                        v-else="banner.newImage"
+                        :src="getImagePreviewUrl(banner.newImage)"
                         alt="Selected Image Preview"
-                        width="50"
+                        width="200"
                         class="mt-2"
                       />
-
-                      {{ specility.name }}
-                      <div class="collapse" :id="'item' + specility._id">
+                    </td>
+                    <td>
+                      {{ banner.priority }}
+                      <div class="collapse" :id="'item' + banner._id">
                         <div class="card card-body">
-                          <form @submit.prevent="updateSpecility(specility)">
+                          <form @submit.prevent="update(banner)">
                             <input
-                              v-model="specility.name"
+                              v-model="banner.priority"
                               class="form-control"
                             />
 
                             Select New Image
                             <input
                               type="file"
-                              @change="onUpdateFileChange($event, specility)"
+                              @change="onUpdateFileChange($event, banner)"
                               class="form-control"
                               ref="fileInput"
                             />
@@ -116,18 +121,18 @@
                         class="custom-badge status-green me-3"
                         type="button"
                         data-bs-toggle="collapse"
-                        :data-bs-target="'#item' + specility._id"
+                        :data-bs-target="'#item' + banner._id"
                         aria-expanded="false"
-                        :aria-controls="'item' + specility._id"
+                        :aria-controls="'item' + banner._id"
                       >
                         Edit
                       </button>
                       <button
                         class="btn btn-outline-danger"
-                        @click.prevent="confirmDeleteSpeciality(specility._id)"
-                        :disabled="deletingSpecialityId === specility._id"
+                        @click.prevent="confirmDelete(banner._id)"
+                        :disabled="deletingBannerId === banner._id"
                       >
-                        <span v-if="deletingSpecialityId === specility._id"
+                        <span v-if="deletingBannerId === banner._id"
                           >Deleting...</span
                         >
                         <span v-else>Delete</span>
@@ -159,12 +164,12 @@ export default {
   },
   data() {
     return {
-      specialties: [],
+      banners: [],
       isLoading: true,
-      deletingSpecialityId: null,
+      deletingBannerId: null,
       fileInputKey: Date.now(), // Unique key for the file input
       newSpeciality: {
-        name: "",
+        priority: "",
         image: null,
       },
     };
@@ -173,9 +178,9 @@ export default {
     try {
       // Fetch all departments when the page loads
       const response = await axios.get(
-        "http://localhost:5000/api/backend/specilities"
+        "http://localhost:5000/api/backend/banners"
       );
-      this.specialties = response.data;
+      this.banners = response.data;
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -187,11 +192,11 @@ export default {
     async create() {
       try {
         const formData = new FormData();
-        formData.append("name", this.newSpeciality.name);
+        formData.append("priority", this.newSpeciality.priority);
         formData.append("image", this.newSpeciality.image);
 
         const response = await axios.post(
-          "http://localhost:5000/api/backend/specialization/add",
+          "http://localhost:5000/api/backend/banner/create",
           formData,
           {
             headers: {
@@ -200,8 +205,8 @@ export default {
           }
         );
 
-        this.specialties.push(response.data);
-        this.newSpeciality.name = "";
+        this.banners.push(response.data);
+        this.newSpeciality.priority = "";
         this.newSpeciality.image = null;
         // Clear the file input manually
         this.fileInputKey = Date.now(); // Reset the file input by updating the key
@@ -213,17 +218,17 @@ export default {
     // Update a department
 
     // Update a specialization, including the image
-    async updateSpecility(specility) {
+    async update(specility) {
       console.log("testing");
       try {
         const formData = new FormData();
-        formData.append("name", specility.name);
+        formData.append("priority", specility.priority);
         if (specility.newImage) {
-          formData.append("updateimage", specility.newImage); // Attach new image if present
+          formData.append("image", specility.newImage); // Attach new image if present
         }
-        console.log("FormData being sent:", formData.get("updateimage"));
+        console.log("FormData being sent:", formData.get("image"));
         await axios.post(
-          `http://localhost:5000/api/backend/speciality/update/${specility._id}`,
+          `http://localhost:5000/api/backend/banner/update/${specility._id}`,
           formData,
           {
             headers: {
@@ -239,31 +244,29 @@ export default {
     },
 
     // Confirmation before deletion
-    async confirmDeleteSpeciality(id) {
+    async confirmDelete(id) {
       const confirmed = window.confirm("Are you sure want to delete this?");
       if (confirmed) {
-        this.deleteSpeciality(id);
+        this.delete(id);
       }
     },
 
     // Delete specility
-    async deleteSpeciality(id) {
-      this.deletingSpecialityId = id; // Disable the button for the speciality being deleted
+    async delete(id) {
+      this.deletingBannerId = id; // Disable the button for the speciality being deleted
       try {
         const response = await axios.delete(
-          `http://localhost:5000/api/backend/speciality/delete/${id}`
+          `http://localhost:5000/api/backend/banner/delete/${id}`
         );
 
         // Remove the deleted speciality from the list in the UI
-        this.specialties = this.specialties.filter(
-          (specility) => specility._id !== id
-        );
+        this.banners = this.banners.filter((specility) => specility._id !== id);
         toastr.success("Deleted SuccessFully.");
       } catch (error) {
         console.log("Error deleting speciality", error);
         toastr.error("Failed to delete.");
       } finally {
-        this.deletingSpecialityId = null;
+        this.deletingBannerId = null;
       }
     },
 

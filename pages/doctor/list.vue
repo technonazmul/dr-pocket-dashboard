@@ -56,6 +56,7 @@
                               type="text"
                               v-model="form.name"
                               placeholder=""
+                              required
                             />
                           </div>
                         </div>
@@ -70,6 +71,7 @@
                               type="text"
                               v-model="form.personalNumber"
                               placeholder=""
+                              required
                             />
                           </div>
                         </div>
@@ -87,27 +89,7 @@
                             />
                           </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                          <div class="input-block local-forms">
-                            <label
-                              >Department
-                              <span class="login-danger">*</span></label
-                            >
-                            <select
-                              class="form-control select"
-                              v-model="form.department"
-                            >
-                              <option>Select</option>
-                              <option
-                                v-for="item in departments"
-                                :key="item._id"
-                                :value="item._id"
-                              >
-                                {{ item.name }}
-                              </option>
-                            </select>
-                          </div>
-                        </div>
+
                         <div class="col-12 col-md-6">
                           <div class="input-block local-forms">
                             <label
@@ -117,8 +99,8 @@
                             <select
                               class="form-control select"
                               v-model="form.specialization"
+                              required
                             >
-                              <option>Select</option>
                               <option
                                 v-for="item in specialties"
                                 :key="item._id"
@@ -129,9 +111,9 @@
                             </select>
                           </div>
                         </div>
-                        <div class="col-12 col-md-6 col-xl-6">
+                        <div class="col-6">
                           <div class="input-block local-forms">
-                            <label>Specialty</label>
+                            <label>Specialties In Text</label>
                             <input
                               class="form-control"
                               type="text"
@@ -140,7 +122,7 @@
                             />
                           </div>
                         </div>
-                        <div class="col-12 col-md-6 col-xl-6">
+                        <div class="col-6">
                           <div class="input-block local-forms">
                             <label>Designation & Department</label>
                             <input
@@ -151,6 +133,54 @@
                             />
                           </div>
                         </div>
+
+                        <div class="col-6">
+                          <div class="input-block local-forms">
+                            <label>Videos</label>
+                            <input
+                              class="form-control"
+                              type="text"
+                              v-model="form.videos"
+                              placeholder=""
+                            />
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-sm-12">
+                          <div class="input-block local-forms">
+                            <label>Biography</label>
+                            <textarea
+                              class="form-control"
+                              rows="3"
+                              v-model="form.biography"
+                            ></textarea>
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-xl-6">
+                          <div class="input-block local-forms">
+                            <label>Experience</label>
+                            <input
+                              class="form-control"
+                              type="text"
+                              v-model="form.experience"
+                              placeholder=""
+                            />
+                          </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-xl-6">
+                          <div class="input-block local-forms">
+                            <label>Total Patients</label>
+                            <input
+                              class="form-control"
+                              type="text"
+                              v-model="form.patient"
+                              placeholder=""
+                            />
+                          </div>
+                        </div>
+
                         <div class="col-12 col-sm-12">
                           <div class="input-block local-forms">
                             <label
@@ -164,6 +194,7 @@
                             ></textarea>
                           </div>
                         </div>
+
                         <div class="col-12 col-sm-12">
                           <div class="input-block local-forms">
                             <label>Visiting Hour (Time & Date)</label>
@@ -215,7 +246,25 @@
                             </div>
                           </div>
                         </div>
-                        <div class="col-12">
+
+                        <div class="col-6">
+                          <div class="input-block local-forms">
+                            <label for=""
+                              >Upload Image
+                              <span class="login-danger">*</span></label
+                            >
+                            <input
+                              type="file"
+                              @change="onFileChange"
+                              class="form-control"
+                              ,
+                              ref="fileInput"
+                              :key="fileInputKey"
+                            />
+                          </div>
+                        </div>
+
+                        <div class="col-6">
                           <div class="input-block local-forms">
                             <label
                               >Password
@@ -226,6 +275,7 @@
                               type="password"
                               v-model="form.password"
                               placeholder=""
+                              required
                             />
                           </div>
                         </div>
@@ -264,7 +314,7 @@
                   <tr>
                     <th>Name</th>
                     <th>Personal Number</th>
-                    <th>Email</th>
+
                     <th>Specialty</th>
                     <th>Qualifications</th>
                     <th>Designation And Department</th>
@@ -278,7 +328,7 @@
                   <tr v-for="item in doctors" :key="item._id">
                     <td>{{ item.name }}</td>
                     <td>{{ item.personalNumber }}</td>
-                    <td>{{ item.email }}</td>
+
                     <td>{{ item.specialty }}</td>
                     <td>{{ item.qualifications }}</td>
                     <td>{{ item.designationAndDepartment }}</td>
@@ -321,7 +371,7 @@ export default {
   data() {
     return {
       specialties: [],
-      departments: [],
+
       doctors: [],
       isLoading: true, // New loading state
       responseMessage: "",
@@ -329,8 +379,11 @@ export default {
         name: "",
         personalNumber: "",
         specialty: "",
+        biography: "",
+        experience: "",
+        videos: "",
+        patient: "",
         specialization: "",
-        department: "",
         designationAndDepartment: "",
         qualifications: "",
         appointmentPhoneNumber: "",
@@ -339,6 +392,7 @@ export default {
         chamberNameAddress: "",
         visitingHour: "",
         password: "",
+        image: null,
 
         timeSlots: {
           Saturday: [""],
@@ -350,6 +404,7 @@ export default {
           Friday: [""],
         },
       },
+      fileInputKey: Date.now(),
     };
   },
   async mounted() {
@@ -365,12 +420,6 @@ export default {
         "http://localhost:5000/api/backend/specilities"
       );
       this.specialties = getspecilities.data;
-
-      // Fetch departments
-      const getdepartment = await axios.get(
-        "http://localhost:5000/api/backend/departments"
-      );
-      this.departments = getdepartment.data;
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -381,15 +430,50 @@ export default {
     // Add doctor
     async addDoctor() {
       try {
-        console.log(this.form);
-        const response = await axios.post(
-          "http://localhost:5000/api/backend/doctor/add",
-          this.form
+        const formData = new FormData();
+
+        // Append form fields to FormData
+        formData.append("name", this.form.name);
+        formData.append("personalNumber", this.form.personalNumber);
+        formData.append("specialty", this.form.specialty);
+        formData.append("biography", this.form.biography);
+        formData.append("experience", this.form.experience);
+        formData.append("videos", this.form.videos);
+        formData.append("patient", this.form.patient);
+        formData.append("specialization", this.form.specialization);
+
+        formData.append(
+          "designationAndDepartment",
+          this.form.designationAndDepartment
         );
+        formData.append("qualifications", this.form.qualifications);
+        formData.append(
+          "appointmentPhoneNumber",
+          this.form.appointmentPhoneNumber
+        );
+        formData.append("email", this.form.email);
+        formData.append("workplace", this.form.workplace);
+        formData.append("chamberNameAddress", this.form.chamberNameAddress);
+        formData.append("visitingHour", this.form.visitingHour);
+        formData.append("password", this.form.password);
+        // Append timeSlots as JSON string
+        formData.append("timeSlots", JSON.stringify(this.form.timeSlots));
+
+        formData.append("image", this.form.image);
+
+        const response = await axios.post(
+          "http://localhost:5000/api/backend/doctor/register",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
         this.doctors.push(response.data);
-        toastr.success("Added Successfully!");
-        // Optionally reset the form
-        this.resetForm();
+
+        //this.resetForm();
       } catch (error) {
         console.error("Error adding doctor:", error);
         alert("There was an error adding the doctor.");
@@ -401,10 +485,9 @@ export default {
     },
     resetForm() {
       this.form = {
-        fullName: "",
+        name: "",
         personalNumber: "",
         qualifications: "",
-        departmentId: "",
         specialtyId: "",
         specialty: "",
         designation: "",
@@ -430,7 +513,12 @@ export default {
         alert("You must have at least one time slot.");
       }
     },
-    // The rest of your methods remain the same
+
+    // Add doctor file upload
+    onFileChange(e) {
+      this.form.image = e.target.files[0];
+      console.log(this.form.image);
+    },
   },
 };
 </script>
